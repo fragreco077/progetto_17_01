@@ -1,0 +1,131 @@
+Osservazioni generali:
+1° screenshot
+Traffico iniziale (righe 1-4):
+
+L'host 192.168.200.150 sta comunicando con 192.168.200.100.
+Il primo protocollo visibile è BROWSER, che è usato per annunci di rete (ad esempio, la condivisione di risorse come file o stampanti). Questo potrebbe essere una normale comunicazione di rete tra dispositivi.
+
+Connessioni TCP (righe successive):
+Notiamo molte richieste SYN inviate da 192.168.200.150 verso 192.168.200.100, seguite da pacchetti di reset RST.
+Questo potrebbe indicare un comportamento anomalo, come un tentativo di connessione non autorizzata o un attacco DoS.
+
+ARP (righe 8-12):
+Vediamo richieste ARP per risolvere gli indirizzi MAC, il che è normale nelle reti locali per stabilire la comunicazione tra dispositivi.
+
+Traffico anomalo (righe 13 in poi):
+Ci sono molte ripetizioni di pacchetti TCP con flag RST, ACK. Questo potrebbe indicare:
+- Una scansione di rete o vulnerabilità: Qualcuno sta cercando di stabilire connessioni con molte porte.
+- Un problema nella configurazione: Un'applicazione potrebbe rifiutare le connessioni in modo anomalo.
+- Un tentativo di attacco (ad esempio SYN Flood): Creazione di connessioni parziali per esaurire le risorse del target.
+
+2° screenshot
+
+Continuazione di traffico RST, ACK:
+Anche in questo screenshot si nota una grande quantità di pacchetti con flag RST, ACK.
+Questo comportamento anomalo persiste, indicando che le connessioni vengono sistematicamente rifiutate o terminate bruscamente.
+I pacchetti con lunghezza pari a 66 (come Frame 40, Frame 41 e altri) sembrano associati a queste interruzioni, probabilmente inviati per chiudere le connessioni.
+
+Ripetizione di richieste SYN (inizializzazione connessione):
+Vediamo pacchetti SYN provenienti sia da 192.168.200.150 che da 192.168.200.100. Questo suggerisce tentativi ripetuti di inizializzare connessioni TCP, ma senza successo.
+Tali pattern potrebbero essere sintomatici di un attacco SYN flood, in cui si cerca di sovraccaricare il server con richieste di connessione.
+
+Pacchetti TCP ACK senza traffico significativo:
+Alcuni pacchetti (es. Frame 66-68) sono puri ACK senza un payload associato. Questo potrebbe essere parte del normale handshake TCP, ma nel contesto di traffico anomalo potrebbe indicare che alcune connessioni sono rimaste in uno stato incompleto.
+
+Port Ranges (porte di origine e destinazione):
+Le porte di origine e destinazione (es. 33028, 55656, 54220, ecc.) sembrano variare molto. Questo potrebbe essere una scansione o tentativi di trovare una porta aperta.
+
+Possibili interpretazioni:
+1)Scansione di rete:
+Un attaccante (molto probabilmente 192.168.200.150) potrebbe stare cercando di scoprire porte aperte su 192.168.200.100. I tentativi sono ripetuti, ma la maggior parte delle connessioni viene rifiutata.
+
+2)Attacco SYN Flood o similare:
+L'alto numero di pacchetti SYN non seguiti da una corretta chiusura della connessione può indicare un tentativo di Denial of Service (DoS).
+Problemi di configurazione:
+
+3)Si potrebbe pensare che cis sia  un problema nella configurazione di rete o firewall,ciò potrebbe spiegare perché ci sono tanti pacchetti RST.
+
+Prevalenza di pacchetti RST, ACK:
+Come nei precedenti screenshot, una gran parte del traffico è costituita da pacchetti RST, ACK, che indicano il reset delle connessioni.
+Le dimensioni di questi pacchetti sono ancora una volta di 66 bytes, segnalando una natura sistematica o automatizzata del traffico.
+
+Tentativi costanti di connessione (SYN):
+Ci sono pacchetti SYN continui provenienti da 192.168.200.100 verso 192.168.200.150, con il tentativo di stabilire connessioni TCP.
+Tali tentativi falliscono costantemente, segnalando che il destinatario (192.168.200.150) non è disposto o in grado di stabilire una connessione.
+
+Alto volume di pacchetti in poco tempo:
+L'intervallo temporale tra i pacchetti è estremamente breve (millisecondi). Questo ritmo è tipico di un'attività automatizzata, come:
+-Scansione delle porte.
+-Attacco SYN flood.
+-Uso di porte multiple:
+
+Le porte di origine/destinazione continuano a cambiare. Ciò rafforza l'ipotesi di un comportamento aggressivo per identificare porte aperte o esaurire le risorse del sistema.
+
+Analisi complessiva: è sempre più evidente che si tratta di un comportamento anomalo. 
+Possibile attacco:
+Gli indirizzi puntano verso un attacco di tipo SYN flood o una scansione aggressiva delle porte, che cerca di sovraccaricare 192.168.200.150.
+L'alto numero di pacchetti RST, ACK potrebbe essere una difesa automatica del sistema o del firewall per bloccare connessioni indesiderate.
+Interruzione delle connessioni:
+192.168.200.150 sembra rigettare sistematicamente le connessioni tramite pacchetti RST.
+
+Ruoli degli host:
+192.168.200.100: Probabile origine del traffico aggressivo.
+192.168.200.150: Probabile vittima, che rifiuta i tentativi di connessione.
+
+I pacchetti sono trasmessi a intervalli di tempo molto brevi (millisecondi), che rafforzano l'idea di un'attività automatizzata come:
+-Un attacco di tipo SYN flood.
+-Una scansione delle porte.
+
+Flusso costante di porte diverse:
+Le porte sorgenti continuano a cambiare, indicando la ricerca di una porta aperta o un tentativo di esaurire le risorse del sistema target.
+Ruoli invariati degli host:
+Incremento nei Timestamp (TSval e TSecr):
+
+I valori di TSval e TSecr continuano ad aggiornarsi in sequenza. Questo è normale per i pacchetti TCP, ma qui non si osservano progressi nel tentativo di stabilire una connessione.
+
+Osservazioni Finali:
+Dato l'alto volume di traffico malevolo, la destinazione (192.168.200.150) potrebbe subire rallentamenti o esaurire risorse a causa del carico, ciò indica che la macchina vittima stia probabilmente subendo un attacco SYNflood , o un tentativo di scansione di rete aggressiva.
+
+Per quanto riguarda le contromisure possiamo suddividerle in base al tempo necessario per attuarle.
+
+Immediate o a breve termine :
+1) Bloccare l'IP sorgente
+Usare il firewall per bloccare l'IP sorgente sospetto (ad esempio, 192.168.200.100).
+Comando esemplificativo (iptables):
+iptables -A INPUT -s 192.168.200.100 -j DROP
+2)  Implementare Rate Limiting
+Configurare il firewall o il router per limitare il numero di pacchetti SYN accettati in un dato intervallo di tempo.
+Ad esempio, in iptables:
+iptables -A INPUT -p tcp --syn -m limit --limit 10/second -j ACCEPT
+3) Usare SYN Cookies
+Abilitare SYN cookies sul server per evitare che le connessioni SYN occupino risorse senza completare il handshake.
+Abilitazione in Linux:
+echo 1 > /proc/sys/net/ipv4/tcp_syncookies
+
+Misure a medio/lungo termine:
+1) Configurare un IDS/IPS
+Implementare un sistema di rilevamento/prevenzione delle intrusioni come:
+-Snort: Regole personalizzate per identificare traffico SYN flood.
+-Suricata: Per bloccare automaticamente traffico malevolo.
+2) Usare un WAF (Web Application Firewall)
+Se l'attacco è diretto a un'applicazione web, bisogna configurare un WAF per filtrare traffico sospetto
+3)Distribuzione del carico
+Implementare un bilanciatore di carico (ad esempio, HAProxy, Nginx, o AWS ELB) per distribuire le richieste su più server e ridurre la pressione su un singolo sistema.
+4) Usare soluzioni anti-DDoS
+Affidarsi a servizi di protezione contro attacchi DDoS, come:
+Cloudflare (gratuito per piccole implementazioni).
+AWS Shield, Akamai, o Imperva per aziende più grandi.
+5) Segmentazione della rete:
+Isolare i sistemi critici da altri dispositivi per minimizzare l'impatto di attacchi interni o laterali.
+6) Protezione tramite VPN o Rete Privata
+Implementare accesso controllato tramite VPN o segmentazione, consentendo così solo connessioni provenienti da fonti fidate.
+
+In ultima analisi è fondamentale condurre continuamente un'attività di monitoraggio e prevenzione ,che possiamo riassumere nei seguenti punti:
+1) Monitoraggio continuo:
+Usare piattaforme di monitoraggio come Zabbix, Nagios, o Prometheus per analizzare il traffico di rete e rilevare anomalie.
+2) Aggiornamenti regolari:
+Assicurarsi che tutti i dispositivi di rete, server, e software siano aggiornati per evitare vulnerabilità note.
+3) Formazione del personale:
+Addestrare il team IT per riconoscere rapidamente gli attacchi e rispondere con contromisure appropriate.
+4) Log centralizzati:
+Usare sistemi come ELK Stack (Elasticsearch, Logstash, Kibana) o Graylog per centralizzare i log e facilitare le analisi post-attacco.
